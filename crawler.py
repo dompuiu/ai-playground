@@ -119,7 +119,7 @@ async def crawl_with_mitmproxy(
                         "networkRequests": url_map,
                     }
 
-            with open("c.json", "w", encoding="utf-8") as f:
+            with open("requests.json", "w", encoding="utf-8") as f:
                 json.dump(export_data, f, indent=2, ensure_ascii=False)
 
             print(f"Crawled {len(results)} page(s)")
