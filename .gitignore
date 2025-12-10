@@ -1,3 +1,4 @@
 requests.json
 proxy_requests.json
+node_modules
 __pycache__/
