@@ -118,14 +118,14 @@ def validate_payload_size(
         page_oversized = []
 
         for request_url, request_data in network_requests.items():
-            # Only check POST requests with payload
+            # Only check POST requests with post_data
             request = request_data.get("request", {})
-            if request.get("method") == "POST" and request.get("payload"):
+            if request.get("method") == "POST" and request.get("post_data"):
                 total_post_requests += 1
                 page_post_requests += 1
 
-                payload = request.get("payload")
-                payload_size = get_payload_size(payload)
+                post_data = request.get("post_data")
+                payload_size = get_payload_size(post_data)
                 all_payload_sizes.append(payload_size)
 
                 if payload_size <= max_size_bytes:
@@ -135,7 +135,7 @@ def validate_payload_size(
                     payloads_over_limit += 1
                     page_payloads_over_limit += 1
                     
-                    event_type = extract_event_type_from_payload(payload)
+                    event_type = extract_event_type_from_payload(post_data)
                     oversized_payload = {
                         "page_url": page_url,
                         "request_url": request_url[:100] + "..." if len(request_url) > 100 else request_url,

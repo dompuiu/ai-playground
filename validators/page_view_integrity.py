@@ -115,15 +115,15 @@ def count_page_view_events(network_data: Dict[str, Any]) -> Dict[str, Any]:
         total_post_requests = 0
 
         for request_url, request_data in network_requests.items():
-            # Only check POST requests with payload
+            # Only check POST requests with post_data
             request = request_data.get("request", {})
-            if request.get("method") == "POST" and request.get("payload"):
+            if request.get("method") == "POST" and request.get("post_data"):
                 total_post_requests += 1
-                event_type = extract_event_type_from_payload(request.get("payload"))
+                event_type = extract_event_type_from_payload(request.get("post_data"))
 
                 if event_type == "web.webpagedetails.pageViews":
                     page_url_from_event = extract_page_url_from_payload(
-                        request.get("payload")
+                        request.get("post_data")
                     )
                     page_view_events.append(
                         {

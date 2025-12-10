@@ -91,10 +91,10 @@ def extract_ecids_from_payload_only(data: Dict[str, Any]) -> Set[str]:
     if data.get("request"):
         request = data["request"]
 
-        # Check payload field
-        payload = request.get("payload")
-        if payload:
-            ecid = extract_ecid_from_payload(payload)
+        # Check post_data field
+        post_data = request.get("post_data")
+        if post_data:
+            ecid = extract_ecid_from_payload(post_data)
             if ecid:
                 ecids.add(ecid)
 
@@ -131,10 +131,10 @@ def extract_ecids_from_network_data(data: Dict[str, Any]) -> Set[str]:
                 if ecid:
                     ecids.add(ecid)
 
-        # Check payload field
-        payload = request.get("payload")
-        if payload:
-            ecid = extract_ecid_from_text(str(payload))
+        # Check post_data field
+        post_data = request.get("post_data")
+        if post_data:
+            ecid = extract_ecid_from_text(str(post_data))
             if ecid:
                 ecids.add(ecid)
 
@@ -297,7 +297,7 @@ def validate_payload_ecid(network_data: Dict[str, Any]) -> Dict[str, Any]:
         for request_url, request_data in network_requests.items():
             # Only check POST requests
             request = request_data.get("request", {})
-            if request.get("method") == "POST" and request.get("payload"):
+            if request.get("method") == "POST" and request.get("post_data"):
                 total_post_requests += 1
                 page_post_requests += 1
 

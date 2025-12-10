@@ -139,14 +139,14 @@ def validate_required_fields(network_data: Dict[str, Any]) -> Dict[str, Any]:
         page_missing_events = []
 
         for request_url, request_data in network_requests.items():
-            # Only check POST requests with payload
+            # Only check POST requests with post_data
             request = request_data.get("request", {})
-            if request.get("method") == "POST" and request.get("payload"):
+            if request.get("method") == "POST" and request.get("post_data"):
                 total_post_requests += 1
                 page_post_requests += 1
 
-                payload = request.get("payload")
-                fields = extract_required_fields_from_payload(payload)
+                post_data = request.get("post_data")
+                fields = extract_required_fields_from_payload(post_data)
 
                 if fields["has_all_required"]:
                     events_with_all_fields += 1

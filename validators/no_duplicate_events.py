@@ -93,14 +93,14 @@ def find_duplicate_events(
 
         for request_url, request_data in network_requests.items():
             request = request_data.get("request", {})
-            if request.get("method") == "POST" and request.get("payload"):
+            if request.get("method") == "POST" and request.get("post_data"):
                 total_post_requests += 1
                 page_post_requests += 1
 
-                payload = request.get("payload")
+                post_data = request.get("post_data")
                 timestamp = request.get("timestamp", 0)
-                payload_hash = hash_payload(payload)
-                event_type = extract_event_type_from_payload(payload)
+                payload_hash = hash_payload(post_data)
+                event_type = extract_event_type_from_payload(post_data)
 
                 if payload_hash:
                     all_events.append(
