@@ -10,6 +10,7 @@ function App() {
   const [validators, setValidators] = useState([])
   const [statusUpdates, setStatusUpdates] = useState([])
   const [isRunning, setIsRunning] = useState(false)
+  const [showForm, setShowForm] = useState(true)
   const wsRef = useRef(null)
 
   useEffect(() => {
@@ -62,6 +63,7 @@ function App() {
     // Clear previous status updates
     setStatusUpdates([])
     setIsRunning(true)
+    setShowForm(false)
 
     try {
       const response = await fetch(`${API_URL}/api/crawl`, {
@@ -96,6 +98,12 @@ function App() {
     }
   }
 
+  const handleNewScan = () => {
+    setStatusUpdates([])
+    setShowForm(true)
+    setIsRunning(false)
+  }
+
   return (
     <div className="app">
       <header className="app-header">
@@ -104,16 +112,19 @@ function App() {
       </header>
 
       <div className="app-content">
-        <CrawlerForm 
-          validators={validators}
-          onStartCrawl={handleStartCrawl}
-          isRunning={isRunning}
-        />
+        {showForm && (
+          <CrawlerForm 
+            validators={validators}
+            onStartCrawl={handleStartCrawl}
+            isRunning={isRunning}
+          />
+        )}
 
-        {statusUpdates.length > 0 && (
+        {(statusUpdates.length > 0 || isRunning) && (
           <StatusDisplay 
             updates={statusUpdates}
             isRunning={isRunning}
+            onNewScan={handleNewScan}
           />
         )}
       </div>

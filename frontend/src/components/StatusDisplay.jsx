@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import './StatusDisplay.css'
 
-function StatusDisplay({ updates, isRunning }) {
+function StatusDisplay({ updates, isRunning, onNewScan }) {
   const [expandedValidators, setExpandedValidators] = useState(new Set())
 
   const toggleValidator = (validatorName) => {
@@ -35,6 +35,9 @@ function StatusDisplay({ updates, isRunning }) {
   // Get error update
   const errorUpdate = updates.find(u => u.type === 'error')
 
+  // Check if scan is complete (either completed or errored)
+  const isScanComplete = !isRunning && (completionUpdate || errorUpdate)
+
   const getStatusIcon = (status) => {
     switch (status) {
       case 'running':
@@ -50,19 +53,21 @@ function StatusDisplay({ updates, isRunning }) {
 
   return (
     <div className="status-display">
-      <h2>Scan Progress</h2>
+      <h2>{isScanComplete ? 'Scan Results' : 'Scan Progress'}</h2>
       
       <div className="status-list">
-        {/* Crawling Status */}
-        <div className={`status-item crawling ${crawlingStatus}`}>
-          <div className="status-header">
-            {getStatusIcon(crawlingStatus)}
-            <span className="status-name">Crawling</span>
-            {crawlingUpdate?.message && (
-              <span className="status-message">{crawlingUpdate.message}</span>
-            )}
+        {/* Crawling Status - Hide when scan is complete */}
+        {!isScanComplete && (
+          <div className={`status-item crawling ${crawlingStatus}`}>
+            <div className="status-header">
+              {getStatusIcon(crawlingStatus)}
+              <span className="status-name">Crawling</span>
+              {crawlingUpdate?.message && (
+                <span className="status-message">{crawlingUpdate.message}</span>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Validator Statuses */}
         {Object.entries(validatorMap).map(([name, update]) => {
@@ -124,6 +129,13 @@ function StatusDisplay({ updates, isRunning }) {
           </div>
         )}
       </div>
+
+      {/* New Scan Button - Show when scan is complete */}
+      {isScanComplete && (
+        <button className="new-scan-button" onClick={onNewScan}>
+          Start New Scan
+        </button>
+      )}
     </div>
   )
 }

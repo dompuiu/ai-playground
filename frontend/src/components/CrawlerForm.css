@@ -150,3 +150,37 @@
   background: #cccccc;
   cursor: not-allowed;
 }
+
+.scanning-display {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.scanning-display h2 {
+  color: #333;
+  margin: 0;
+  font-size: 22px;
+}
+
+.scanning-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background: #f9f9f9;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+}
+
+.scanning-label {
+  font-weight: 600;
+  color: #666;
+  font-size: 14px;
+}
+
+.scanning-url {
+  color: #333;
+  font-size: 16px;
+  word-break: break-all;
+}

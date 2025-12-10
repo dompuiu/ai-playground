@@ -205,3 +205,25 @@
 .stat-value.passed {
   color: #4CAF50;
 }
+
+.new-scan-button {
+  margin-top: 20px;
+  width: 100%;
+  padding: 14px 24px;
+  background: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.new-scan-button:hover {
+  background: #1976D2;
+}
+
+.new-scan-button:active {
+  transform: translateY(1px);
+}
