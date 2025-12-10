@@ -1,6 +1,6 @@
 import asyncio
 import re
-from crawler import crawl_with_network_capture
+from crawler import crawl_with_mitmproxy
 
 
 async def main():
@@ -12,12 +12,13 @@ async def main():
         r"marketingtech.*launch-",  # URLs containing marketingtech and launch-
     ]
 
-    await crawl_with_network_capture(
+    await crawl_with_mitmproxy(
         url="https://www.adobe.com",
         network_patterns=network_patterns,
-        max_pages=4,
+        max_pages=5,
         max_depth=2,
         headless=False,
+        output_file="requests.json",
     )
 
 
