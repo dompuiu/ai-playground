@@ -1,19 +1,19 @@
 import json
-from typing import Dict, Any, List, Optional, Set
+from typing import Dict, Any
 
 
-def extract_required_fields_from_post_data(post_data: str) -> Dict[str, Any]:
+def extract_required_fields_from_payload(payload: str) -> Dict[str, Any]:
     """
-    Extract required fields from Adobe Experience Platform post_data JSON.
+    Extract required fields from Adobe Experience Platform payload JSON.
     Checks for: eventType, timestamp, identityMap
 
     Args:
-        post_data: The POST data string (JSON format)
+        payload: The POST payload string (JSON format)
 
     Returns:
         Dictionary with field presence information
     """
-    if not post_data:
+    if not payload:
         return {
             "eventType": None,
             "timestamp": None,
@@ -24,7 +24,7 @@ def extract_required_fields_from_post_data(post_data: str) -> Dict[str, Any]:
 
     try:
         # Parse the JSON string
-        data = json.loads(post_data)
+        data = json.loads(payload)
 
         event_type = None
         timestamp = None
@@ -35,19 +35,19 @@ def extract_required_fields_from_post_data(post_data: str) -> Dict[str, Any]:
             # Check event.xdm structure (most common)
             if "event" in data and "xdm" in data["event"]:
                 xdm = data["event"]["xdm"]
-                
+
                 # Check eventType
                 event_type = xdm.get("eventType")
                 if not event_type:
                     # Also check top-level
                     event_type = data.get("eventType")
-                
+
                 # Check timestamp
                 timestamp = xdm.get("timestamp")
                 if not timestamp:
                     # Also check top-level
                     timestamp = data.get("timestamp")
-                
+
                 # Check identityMap
                 identity_map = xdm.get("identityMap")
                 if not identity_map:
@@ -120,14 +120,14 @@ def validate_required_fields(network_data: Dict[str, Any]) -> Dict[str, Any]:
     total_post_requests = 0
     events_with_all_fields = 0
     events_missing_fields = 0
-    
+
     # Track which fields are missing across all events
     field_missing_count = {
         "eventType": 0,
         "timestamp": 0,
         "identityMap": 0,
     }
-    
+
     details = []
     all_missing_events = []
 
@@ -139,14 +139,14 @@ def validate_required_fields(network_data: Dict[str, Any]) -> Dict[str, Any]:
         page_missing_events = []
 
         for request_url, request_data in network_requests.items():
-            # Only check POST requests with post_data
+            # Only check POST requests with payload
             request = request_data.get("request", {})
-            if request.get("method") == "POST" and request.get("post_data"):
+            if request.get("method") == "POST" and request.get("payload"):
                 total_post_requests += 1
                 page_post_requests += 1
 
-                post_data = request.get("post_data")
-                fields = extract_required_fields_from_post_data(post_data)
+                payload = request.get("payload")
+                fields = extract_required_fields_from_payload(payload)
 
                 if fields["has_all_required"]:
                     events_with_all_fields += 1
@@ -154,26 +154,34 @@ def validate_required_fields(network_data: Dict[str, Any]) -> Dict[str, Any]:
                 else:
                     events_missing_fields += 1
                     page_events_missing_fields += 1
-                    
+
                     # Track which fields are missing
                     for field in fields["missing_fields"]:
                         field_missing_count[field] += 1
-                    
+
                     # Store details about missing fields
                     missing_event = {
-                        "request_url": request_url[:100] + "..." if len(request_url) > 100 else request_url,
+                        "request_url": request_url[:100] + "..."
+                        if len(request_url) > 100
+                        else request_url,
                         "timestamp": request.get("timestamp"),
                         "missing_fields": fields["missing_fields"],
                         "eventType": fields.get("eventType", "N/A"),
                         "has_parse_error": fields.get("parse_error", False),
                     }
                     page_missing_events.append(missing_event)
-                    all_missing_events.append({
-                        **missing_event,
-                        "page_url": page_url,
-                    })
+                    all_missing_events.append(
+                        {
+                            **missing_event,
+                            "page_url": page_url,
+                        }
+                    )
 
-        status = "✓ PASS" if page_events_missing_fields == 0 else f"✗ FAIL - {page_events_missing_fields} event(s) missing fields"
+        status = (
+            "✓ PASS"
+            if page_events_missing_fields == 0
+            else f"✗ FAIL - {page_events_missing_fields} event(s) missing fields"
+        )
 
         details.append(
             {
@@ -205,7 +213,8 @@ def validate_required_fields(network_data: Dict[str, Any]) -> Dict[str, Any]:
             },
             "identityMap": {
                 "missing_count": field_missing_count["identityMap"],
-                "present_count": total_post_requests - field_missing_count["identityMap"],
+                "present_count": total_post_requests
+                - field_missing_count["identityMap"],
             },
         },
         "details": details,
@@ -239,7 +248,7 @@ if __name__ == "__main__":
     import sys
 
     # Get file path from command line or use default
-    file_path = sys.argv[1] if len(sys.argv) > 1 else "network_requests_grouped.json"
+    file_path = sys.argv[1] if len(sys.argv) > 1 else "requests.json"
 
     result = validate_required_fields_from_file(file_path)
 
@@ -264,14 +273,14 @@ if __name__ == "__main__":
         print("\n" + "-" * 70)
         print("Events with Missing Fields:")
         print("-" * 70)
-        
+
         for i, event in enumerate(result["all_missing_events"], 1):
             print(f"\n[{i}] Page: {event['page_url']}")
             print(f"    Request: {event['request_url']}")
             print(f"    Event Type: {event['eventType']}")
             print(f"    Missing Fields: {', '.join(event['missing_fields'])}")
             if event.get("has_parse_error"):
-                print(f"    ⚠ Parse Error: Unable to parse POST data")
+                print("    ⚠ Parse Error: Unable to parse payload")
 
     print("\n" + "-" * 70)
     print("Per-page breakdown:")

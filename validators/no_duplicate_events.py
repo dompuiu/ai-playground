@@ -3,46 +3,46 @@ import hashlib
 from typing import Dict, Any, List, Tuple, Optional
 
 
-def hash_post_data(post_data: str) -> Optional[str]:
+def hash_payload(payload: str) -> Optional[str]:
     """
-    Create a hash of the POST data payload for comparison.
+    Create a hash of the POST payload for comparison.
 
     Args:
-        post_data: The POST data string (JSON format)
+        payload: The POST payload string (JSON format)
 
     Returns:
         SHA256 hash of the payload, or None if invalid
     """
-    if not post_data:
+    if not payload:
         return None
 
     try:
         # Parse and re-serialize to normalize the JSON
         # This ensures identical data structures produce the same hash
         # even if whitespace or key ordering differs
-        data = json.loads(post_data)
+        data = json.loads(payload)
         normalized = json.dumps(data, sort_keys=True, separators=(",", ":"))
         return hashlib.sha256(normalized.encode("utf-8")).hexdigest()
     except (json.JSONDecodeError, TypeError):
         # If parsing fails, hash the raw string
-        return hashlib.sha256(post_data.encode("utf-8")).hexdigest()
+        return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
-def extract_event_type_from_post_data(post_data: str) -> Optional[str]:
+def extract_event_type_from_payload(payload: str) -> Optional[str]:
     """
-    Extract eventType from Adobe Experience Platform post_data JSON.
+    Extract eventType from Adobe Experience Platform payload JSON.
 
     Args:
-        post_data: The POST data string (JSON format)
+        payload: The POST payload string (JSON format)
 
     Returns:
         The eventType value if found, None otherwise
     """
-    if not post_data:
+    if not payload:
         return None
 
     try:
-        data = json.loads(post_data)
+        data = json.loads(payload)
 
         if isinstance(data, dict):
             # Check event.xdm.eventType
@@ -93,14 +93,14 @@ def find_duplicate_events(
 
         for request_url, request_data in network_requests.items():
             request = request_data.get("request", {})
-            if request.get("method") == "POST" and request.get("post_data"):
+            if request.get("method") == "POST" and request.get("payload"):
                 total_post_requests += 1
                 page_post_requests += 1
 
-                post_data = request.get("post_data")
+                payload = request.get("payload")
                 timestamp = request.get("timestamp", 0)
-                payload_hash = hash_post_data(post_data)
-                event_type = extract_event_type_from_post_data(post_data)
+                payload_hash = hash_payload(payload)
+                event_type = extract_event_type_from_payload(payload)
 
                 if payload_hash:
                     all_events.append(
@@ -217,7 +217,7 @@ if __name__ == "__main__":
     import sys
 
     # Get file path and optional time window from command line
-    file_path = sys.argv[1] if len(sys.argv) > 1 else "network_requests_grouped.json"
+    file_path = sys.argv[1] if len(sys.argv) > 1 else "requests.json"
     time_window = float(sys.argv[2]) if len(sys.argv) > 2 else 1.0
 
     result = validate_no_duplicate_events_from_file(file_path, time_window)

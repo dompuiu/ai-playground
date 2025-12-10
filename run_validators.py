@@ -34,7 +34,7 @@ def run_validator(script_name, args, description):
 
 def main():
     """Run all validators and provide summary."""
-    file_path = sys.argv[1] if len(sys.argv) > 1 else "network_requests_grouped.json"
+    file_path = sys.argv[1] if len(sys.argv) > 1 else "requests.json"
     time_window = sys.argv[2] if len(sys.argv) > 2 else "1.0"
 
     print("=" * 70)
@@ -52,7 +52,7 @@ def main():
         {
             "name": "ECID Consistency",
             "script": "ecid_consistency.py",
-            "args": ["post_data", file_path],
+            "args": ["payload", file_path],
         },
         {
             "name": "Page View Integrity",
@@ -127,7 +127,7 @@ if __name__ == "__main__":
         print()
         print("Arguments:")
         print(
-            "  file_path      Path to network requests JSON file (default: network_requests_grouped.json)"
+            "  file_path      Path to network requests JSON file (default: requests.json)"
         )
         print(
             "  time_window    Time window for duplicate detection in seconds (default: 1.0)"
@@ -139,9 +139,9 @@ if __name__ == "__main__":
         print()
         print("Examples:")
         print("  python3 run_validators.py")
-        print("  python3 run_validators.py network_requests_grouped.json")
-        print("  python3 run_validators.py network_requests_grouped.json 5.0")
-        print("  python3 run_validators.py network_requests_grouped.json 1.0 --verbose")
+        print("  python3 run_validators.py requests.json")
+        print("  python3 run_validators.py requests.json 5.0")
+        print("  python3 run_validators.py requests.json 1.0 --verbose")
         sys.exit(0)
 
     main()

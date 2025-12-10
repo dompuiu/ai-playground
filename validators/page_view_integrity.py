@@ -2,22 +2,22 @@ import json
 from typing import Dict, Any, List, Optional
 
 
-def extract_event_type_from_post_data(post_data: str) -> Optional[str]:
+def extract_event_type_from_payload(payload: str) -> Optional[str]:
     """
-    Extract eventType from Adobe Experience Platform post_data JSON.
+    Extract eventType from Adobe Experience Platform payload JSON.
 
     Args:
-        post_data: The POST data string (JSON format)
+        payload: The POST payload string (JSON format)
 
     Returns:
         The eventType value if found, None otherwise
     """
-    if not post_data:
+    if not payload:
         return None
 
     try:
         # Parse the JSON string
-        data = json.loads(post_data)
+        data = json.loads(payload)
 
         # Look for eventType in the event.xdm structure
         if isinstance(data, dict):
@@ -38,22 +38,22 @@ def extract_event_type_from_post_data(post_data: str) -> Optional[str]:
     return None
 
 
-def extract_page_url_from_post_data(post_data: str) -> Optional[str]:
+def extract_page_url_from_payload(payload: str) -> Optional[str]:
     """
-    Extract page URL from Adobe Experience Platform post_data JSON.
+    Extract page URL from Adobe Experience Platform payload JSON.
 
     Args:
-        post_data: The POST data string (JSON format)
+        payload: The POST payload string (JSON format)
 
     Returns:
         The page URL if found, None otherwise
     """
-    if not post_data:
+    if not payload:
         return None
 
     try:
         # Parse the JSON string
-        data = json.loads(post_data)
+        data = json.loads(payload)
 
         # Look for web.webPageDetails.URL in the event.xdm structure
         if isinstance(data, dict):
@@ -115,15 +115,15 @@ def count_page_view_events(network_data: Dict[str, Any]) -> Dict[str, Any]:
         total_post_requests = 0
 
         for request_url, request_data in network_requests.items():
-            # Only check POST requests with post_data
+            # Only check POST requests with payload
             request = request_data.get("request", {})
-            if request.get("method") == "POST" and request.get("post_data"):
+            if request.get("method") == "POST" and request.get("payload"):
                 total_post_requests += 1
-                event_type = extract_event_type_from_post_data(request.get("post_data"))
+                event_type = extract_event_type_from_payload(request.get("payload"))
 
                 if event_type == "web.webpagedetails.pageViews":
-                    page_url_from_event = extract_page_url_from_post_data(
-                        request.get("post_data")
+                    page_url_from_event = extract_page_url_from_payload(
+                        request.get("payload")
                     )
                     page_view_events.append(
                         {
@@ -194,7 +194,7 @@ if __name__ == "__main__":
     import sys
 
     # Get file path from command line or use default
-    file_path = sys.argv[1] if len(sys.argv) > 1 else "network_requests_grouped.json"
+    file_path = sys.argv[1] if len(sys.argv) > 1 else "requests.json"
 
     result = validate_page_view_integrity_from_file(file_path)
 

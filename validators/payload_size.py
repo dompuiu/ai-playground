@@ -2,21 +2,21 @@ import json
 from typing import Dict, Any, List, Optional
 
 
-def get_payload_size(post_data: str) -> int:
+def get_payload_size(payload: str) -> int:
     """
-    Calculate the size of POST data payload in bytes.
+    Calculate the size of POST payload in bytes.
 
     Args:
-        post_data: The POST data string
+        payload: The POST payload string
 
     Returns:
         Size in bytes
     """
-    if not post_data:
+    if not payload:
         return 0
     
     # Get size in bytes (UTF-8 encoded)
-    return len(post_data.encode('utf-8'))
+    return len(payload.encode('utf-8'))
 
 
 def format_size(size_bytes: int) -> str:
@@ -37,21 +37,21 @@ def format_size(size_bytes: int) -> str:
         return f"{mb:.2f} MB"
 
 
-def extract_event_type_from_post_data(post_data: str) -> Optional[str]:
+def extract_event_type_from_payload(payload: str) -> Optional[str]:
     """
-    Extract eventType from Adobe Experience Platform post_data JSON.
+    Extract eventType from Adobe Experience Platform payload JSON.
 
     Args:
-        post_data: The POST data string (JSON format)
+        payload: The POST payload string (JSON format)
 
     Returns:
         The eventType value if found, None otherwise
     """
-    if not post_data:
+    if not payload:
         return None
 
     try:
-        data = json.loads(post_data)
+        data = json.loads(payload)
 
         if isinstance(data, dict):
             # Check event.xdm.eventType
@@ -68,6 +68,12 @@ def extract_event_type_from_post_data(post_data: str) -> Optional[str]:
         pass
 
     return None
+
+
+# Backwards compatibility alias
+def extract_event_type_from_post_data(post_data: str) -> Optional[str]:
+    """Deprecated: Use extract_event_type_from_payload instead."""
+    return extract_event_type_from_payload(post_data)
 
 
 def validate_payload_size(
@@ -112,14 +118,14 @@ def validate_payload_size(
         page_oversized = []
 
         for request_url, request_data in network_requests.items():
-            # Only check POST requests with post_data
+            # Only check POST requests with payload
             request = request_data.get("request", {})
-            if request.get("method") == "POST" and request.get("post_data"):
+            if request.get("method") == "POST" and request.get("payload"):
                 total_post_requests += 1
                 page_post_requests += 1
 
-                post_data = request.get("post_data")
-                payload_size = get_payload_size(post_data)
+                payload = request.get("payload")
+                payload_size = get_payload_size(payload)
                 all_payload_sizes.append(payload_size)
 
                 if payload_size <= max_size_bytes:
@@ -129,7 +135,7 @@ def validate_payload_size(
                     payloads_over_limit += 1
                     page_payloads_over_limit += 1
                     
-                    event_type = extract_event_type_from_post_data(post_data)
+                    event_type = extract_event_type_from_payload(payload)
                     oversized_payload = {
                         "page_url": page_url,
                         "request_url": request_url[:100] + "..." if len(request_url) > 100 else request_url,
@@ -209,7 +215,7 @@ if __name__ == "__main__":
     import sys
 
     # Get file path and optional size limit from command line
-    file_path = sys.argv[1] if len(sys.argv) > 1 else "network_requests_grouped.json"
+    file_path = sys.argv[1] if len(sys.argv) > 1 else "requests.json"
     max_size_kb = float(sys.argv[2]) if len(sys.argv) > 2 else 32.0
 
     result = validate_payload_size_from_file(file_path, max_size_kb)

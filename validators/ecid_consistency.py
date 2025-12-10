@@ -35,23 +35,23 @@ def extract_ecid_from_text(text: str) -> Optional[str]:
     return None
 
 
-def extract_ecid_from_post_data(post_data: str) -> Optional[str]:
+def extract_ecid_from_payload(payload: str) -> Optional[str]:
     """
-    Extract ECID specifically from Adobe Experience Platform post_data JSON.
+    Extract ECID specifically from Adobe Experience Platform payload JSON.
     Looks for the ECID in the identityMap.ECID structure.
 
     Args:
-        post_data: The POST data string (JSON format)
+        payload: The POST payload string (JSON format)
 
     Returns:
         The ECID value if found in identityMap, None otherwise
     """
-    if not post_data:
+    if not payload:
         return None
 
     try:
         # Parse the JSON string
-        data = json.loads(post_data)
+        data = json.loads(payload)
 
         # Look for identityMap.ECID in the event.xdm structure
         if isinstance(data, dict):
@@ -75,15 +75,15 @@ def extract_ecid_from_post_data(post_data: str) -> Optional[str]:
     return None
 
 
-def extract_ecids_from_post_data_only(data: Dict[str, Any]) -> Set[str]:
+def extract_ecids_from_payload_only(data: Dict[str, Any]) -> Set[str]:
     """
-    Extract ECIDs from POST data only (not from URLs).
+    Extract ECIDs from POST payload only (not from URLs).
 
     Args:
         data: Dictionary containing network request/response data
 
     Returns:
-        Set of unique ECID values found in POST data
+        Set of unique ECID values found in POST payload
     """
     ecids = set()
 
@@ -91,10 +91,10 @@ def extract_ecids_from_post_data_only(data: Dict[str, Any]) -> Set[str]:
     if data.get("request"):
         request = data["request"]
 
-        # Check post data only
-        post_data = request.get("post_data")
-        if post_data:
-            ecid = extract_ecid_from_post_data(post_data)
+        # Check payload field
+        payload = request.get("payload")
+        if payload:
+            ecid = extract_ecid_from_payload(payload)
             if ecid:
                 ecids.add(ecid)
 
@@ -131,10 +131,10 @@ def extract_ecids_from_network_data(data: Dict[str, Any]) -> Set[str]:
                 if ecid:
                     ecids.add(ecid)
 
-        # Check post data
-        post_data = request.get("post_data")
-        if post_data:
-            ecid = extract_ecid_from_text(str(post_data))
+        # Check payload field
+        payload = request.get("payload")
+        if payload:
+            ecid = extract_ecid_from_text(str(payload))
             if ecid:
                 ecids.add(ecid)
 
@@ -250,10 +250,10 @@ def validate_same_ecid(network_data: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-def validate_post_data_ecid(network_data: Dict[str, Any]) -> Dict[str, Any]:
+def validate_payload_ecid(network_data: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Validate that all POST data requests share the same ECID.
-    This function specifically looks at the identityMap.ECID field in POST data,
+    Validate that all POST payload requests share the same ECID.
+    This function specifically looks at the identityMap.ECID field in POST payload,
     ignoring ECIDs found in URLs or other places.
 
     Args:
@@ -274,10 +274,10 @@ def validate_post_data_ecid(network_data: Dict[str, Any]) -> Dict[str, Any]:
     Returns:
         Dictionary containing validation results:
         {
-            "valid": bool,  # True if all POST data events share the same ECID
-            "ecids_found": list,  # List of unique ECIDs found in POST data
+            "valid": bool,  # True if all POST payload events share the same ECID
+            "ecids_found": list,  # List of unique ECIDs found in POST payload
             "total_ecids": int,  # Count of unique ECIDs
-            "requests_with_ecid": int,  # Number of requests with POST data ECID
+            "requests_with_ecid": int,  # Number of requests with POST payload ECID
             "total_post_requests": int,  # Total number of POST requests checked
             "details": list  # Detailed breakdown per page
         }
@@ -297,11 +297,11 @@ def validate_post_data_ecid(network_data: Dict[str, Any]) -> Dict[str, Any]:
         for request_url, request_data in network_requests.items():
             # Only check POST requests
             request = request_data.get("request", {})
-            if request.get("method") == "POST" and request.get("post_data"):
+            if request.get("method") == "POST" and request.get("payload"):
                 total_post_requests += 1
                 page_post_requests += 1
 
-                ecids = extract_ecids_from_post_data_only(request_data)
+                ecids = extract_ecids_from_payload_only(request_data)
                 if ecids:
                     requests_with_ecid += 1
                     page_requests_with_ecid += 1
@@ -334,11 +334,11 @@ def validate_post_data_ecid(network_data: Dict[str, Any]) -> Dict[str, Any]:
         "total_post_requests": total_post_requests,
         "details": details,
         "message": (
-            f"✓ All POST data requests share the same ECID: {ecids_list[0]}"
+            f"✓ All POST payload requests share the same ECID: {ecids_list[0]}"
             if len(all_ecids) == 1
-            else f"✗ Multiple ECIDs found in POST data: {ecids_list}"
+            else f"✗ Multiple ECIDs found in POST payload: {ecids_list}"
             if len(all_ecids) > 1
-            else "⚠ No ECID found in POST data"
+            else "⚠ No ECID found in POST payload"
         ),
     }
 
@@ -359,9 +359,9 @@ def validate_ecid_from_file(file_path: str) -> Dict[str, Any]:
     return validate_same_ecid(data)
 
 
-def validate_post_data_ecid_from_file(file_path: str) -> Dict[str, Any]:
+def validate_payload_ecid_from_file(file_path: str) -> Dict[str, Any]:
     """
-    Load JSON data from file and validate POST data ECID consistency.
+    Load JSON data from file and validate POST payload ECID consistency.
 
     Args:
         file_path: Path to JSON file with network request data
@@ -372,22 +372,43 @@ def validate_post_data_ecid_from_file(file_path: str) -> Dict[str, Any]:
     with open(file_path, "r", encoding="utf-8") as f:
         data = json.load(f)
 
-    return validate_post_data_ecid(data)
+    return validate_payload_ecid(data)
+
+
+# Backwards compatibility aliases
+def extract_ecid_from_post_data(post_data: str) -> Optional[str]:
+    """Deprecated: Use extract_ecid_from_payload instead."""
+    return extract_ecid_from_payload(post_data)
+
+
+def extract_ecids_from_post_data_only(data: Dict[str, Any]) -> Set[str]:
+    """Deprecated: Use extract_ecids_from_payload_only instead."""
+    return extract_ecids_from_payload_only(data)
+
+
+def validate_post_data_ecid(network_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Deprecated: Use validate_payload_ecid instead."""
+    return validate_payload_ecid(network_data)
+
+
+def validate_post_data_ecid_from_file(file_path: str) -> Dict[str, Any]:
+    """Deprecated: Use validate_payload_ecid_from_file instead."""
+    return validate_payload_ecid_from_file(file_path)
 
 
 if __name__ == "__main__":
     import sys
 
     # Check if a specific validation type is requested
-    validation_type = sys.argv[1] if len(sys.argv) > 1 else "post_data"
-    file_path = sys.argv[2] if len(sys.argv) > 2 else "network_requests_grouped.json"
+    validation_type = sys.argv[1] if len(sys.argv) > 1 else "payload"
+    file_path = sys.argv[2] if len(sys.argv) > 2 else "requests.json"
 
-    if validation_type == "post_data":
-        # Validate POST data ECIDs only (excluding URLs)
-        result = validate_post_data_ecid_from_file(file_path)
+    if validation_type == "payload" or validation_type == "post_data":
+        # Validate POST payload ECIDs only (excluding URLs)
+        result = validate_payload_ecid_from_file(file_path)
 
         print("=" * 60)
-        print("POST Data ECID Validation Results")
+        print("POST Payload ECID Validation Results")
         print("=" * 60)
         print(f"\n{result['message']}\n")
         print(f"Total POST requests checked: {result['total_post_requests']}")
@@ -395,7 +416,7 @@ if __name__ == "__main__":
         print(f"Unique ECIDs found: {result['total_ecids']}")
 
         if result["ecids_found"]:
-            print("\nECID(s) from POST data:")
+            print("\nECID(s) from POST payload:")
             for ecid in result["ecids_found"]:
                 print(f"  - {ecid}")
 

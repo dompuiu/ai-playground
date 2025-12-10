@@ -42,11 +42,11 @@ class CaptureAddon:
 
         # Get referrer from request headers
         referrer = flow.request.headers.get("Referer", "No Referrer")
-        
+
         # Initialize referrer group if not exists
         if referrer not in self.captured_data:
             self.captured_data[referrer] = {}
-        
+
         # Initialize entry for this URL if not exists
         if url not in self.captured_data[referrer]:
             self.captured_data[referrer][url] = {
@@ -59,7 +59,7 @@ class CaptureAddon:
             "url": url,
             "method": flow.request.method,
             "headers": dict(flow.request.headers),
-            "post_data": flow.request.content.decode("utf-8", errors="ignore")
+            "payload": flow.request.content.decode("utf-8", errors="ignore")
             if flow.request.content
             else None,
             "timestamp": flow.request.timestamp_start,
@@ -77,11 +77,11 @@ class CaptureAddon:
 
         # Get referrer from request headers
         referrer = flow.request.headers.get("Referer", "No Referrer")
-        
+
         # Initialize referrer group if not exists
         if referrer not in self.captured_data:
             self.captured_data[referrer] = {}
-        
+
         # Initialize entry for this URL if not exists
         if url not in self.captured_data[referrer]:
             self.captured_data[referrer][url] = {
@@ -109,18 +109,20 @@ class CaptureAddon:
             # Format: {page_url: {networkRequests: {...}}}
             output_data = {}
             total_requests = 0
-            
+
             for referrer, requests in self.captured_data.items():
                 output_data[referrer] = {
                     "html": "",  # Not captured by mitmproxy
-                    "networkRequests": requests
+                    "networkRequests": requests,
                 }
                 total_requests += len(requests)
-            
+
             with open(self.output_file, "w", encoding="utf-8") as f:
                 json.dump(output_data, f, indent=2, ensure_ascii=False)
-            
-            print(f"\nSaved {total_requests} requests grouped by {len(output_data)} referrer(s) to {self.output_file}")
+
+            print(
+                f"\nSaved {total_requests} requests grouped by {len(output_data)} referrer(s) to {self.output_file}"
+            )
 
 
 def start_mitmproxy(
