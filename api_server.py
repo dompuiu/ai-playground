@@ -37,6 +37,7 @@ class CrawlRequest(BaseModel):
     validators: List[str]
     max_pages: int = 4
     max_depth: int = 2
+    delay_before_return_html: float = 5.0
 
 
 class StatusUpdate(BaseModel):
@@ -173,6 +174,7 @@ async def execute_crawl_and_validate(request: CrawlRequest):
             network_patterns=network_patterns,
             max_pages=request.max_pages,
             max_depth=request.max_depth,
+            delay_before_return_html=request.delay_before_return_html,
             headless=True,
             output_file="ping_requests.json",
         )

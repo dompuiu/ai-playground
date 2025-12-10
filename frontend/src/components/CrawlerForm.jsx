@@ -4,6 +4,8 @@ import './CrawlerForm.css'
 function CrawlerForm({ validators, onStartCrawl, isRunning }) {
   const [url, setUrl] = useState('')
   const [selectedValidators, setSelectedValidators] = useState([])
+  const [maxPages, setMaxPages] = useState(5)
+  const [delayBeforeReturnHtml, setDelayBeforeReturnHtml] = useState(5.0)
 
   // Select all validators by default
   useEffect(() => {
@@ -33,7 +35,7 @@ function CrawlerForm({ validators, onStartCrawl, isRunning }) {
   const handleSubmit = (e) => {
     e.preventDefault()
     if (url && selectedValidators.length > 0) {
-      onStartCrawl(url, selectedValidators)
+      onStartCrawl(url, selectedValidators, maxPages, delayBeforeReturnHtml)
     }
   }
 
@@ -71,6 +73,37 @@ function CrawlerForm({ validators, onStartCrawl, isRunning }) {
                 >
                   {isRunning ? 'Scanning...' : 'Scan'}
                 </button>
+              </div>
+            </div>
+
+            <div className="form-group options-row">
+              <div className="option-field">
+                <label htmlFor="maxPages">Max Pages</label>
+                <input
+                  type="number"
+                  id="maxPages"
+                  value={maxPages}
+                  onChange={(e) => setMaxPages(parseInt(e.target.value) || 5)}
+                  min="1"
+                  max="20"
+                  disabled={isRunning}
+                  className="number-input"
+                />
+              </div>
+
+              <div className="option-field">
+                <label htmlFor="delay">Delay Before Return HTML (seconds)</label>
+                <input
+                  type="number"
+                  id="delay"
+                  value={delayBeforeReturnHtml}
+                  onChange={(e) => setDelayBeforeReturnHtml(parseFloat(e.target.value) || 5.0)}
+                  min="0"
+                  max="30"
+                  step="0.5"
+                  disabled={isRunning}
+                  className="number-input"
+                />
               </div>
             </div>
 

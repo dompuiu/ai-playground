@@ -54,6 +54,42 @@
   cursor: not-allowed;
 }
 
+.options-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.option-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.option-field label {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+}
+
+.number-input {
+  padding: 10px 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 16px;
+  transition: border-color 0.3s;
+}
+
+.number-input:focus {
+  outline: none;
+  border-color: #4CAF50;
+}
+
+.number-input:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+}
+
 .scan-button-inline {
   padding: 12px 24px;
   background: #4CAF50;

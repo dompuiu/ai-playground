@@ -12,6 +12,7 @@ async def crawl_with_mitmproxy(
     network_patterns: List[str],
     max_pages: int = 4,
     max_depth: int = 2,
+    delay_before_return_html: float = 5.0,
     headless: bool = True,
     output_file: str = "ping_requests.json",
 ) -> None:
@@ -24,6 +25,7 @@ async def crawl_with_mitmproxy(
         network_patterns: List of regex patterns to match against network request URLs
         max_depth: Maximum depth for deep crawling (default: 2)
         max_pages: Maximum number of pages to crawl (default: 4)
+        delay_before_return_html: Delay in seconds before returning HTML (default: 5.0)
         headless: Whether to run browser in headless mode (default: True)
         output_file: Path to save the mitmproxy captured data (default: "ping_requests.json")
     """
@@ -39,7 +41,7 @@ async def crawl_with_mitmproxy(
         )
         run_conf = CrawlerRunConfig(
             cache_mode=CacheMode.BYPASS,
-            delay_before_return_html=5.0,
+            delay_before_return_html=delay_before_return_html,
             page_timeout=60000,
             capture_network_requests=True,
             capture_console_messages=False,

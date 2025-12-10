@@ -59,7 +59,7 @@ function App() {
     };
   }, []);
 
-  const handleStartCrawl = async (url, selectedValidators) => {
+  const handleStartCrawl = async (url, selectedValidators, maxPages, delayBeforeReturnHtml) => {
     // Clear previous status updates
     setStatusUpdates([]);
     setIsRunning(true);
@@ -74,8 +74,9 @@ function App() {
         body: JSON.stringify({
           url,
           validators: selectedValidators,
-          max_pages: 4,
+          max_pages: maxPages,
           max_depth: 2,
+          delay_before_return_html: delayBeforeReturnHtml,
         }),
       });
 
