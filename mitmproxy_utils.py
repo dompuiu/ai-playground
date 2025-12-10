@@ -17,7 +17,7 @@ class CaptureAddon:
     Groups captured requests by referrer (page URL).
     """
 
-    def __init__(self, patterns: List[str], output_file: str = "ping_requests.json"):
+    def __init__(self, patterns: List[str], output_file: str = "proxy_requests.json"):
         """
         Initialize the addon with regex patterns to match ping requests.
 
@@ -27,8 +27,8 @@ class CaptureAddon:
         """
         self.patterns = [re.compile(pattern) for pattern in patterns]
         self.output_file = output_file
-        # Structure: {referrer_url: {request_url: {request: {...}, response: {...}}}}
-        self.captured_data: Dict[str, Dict[str, Any]] = {}
+        # Structure: {request_url: {request: {...}, response: {...}}}
+        self.captured_data: Dict[str, Any] = {}
 
     def request(self, flow) -> None:
         """
@@ -40,22 +40,15 @@ class CaptureAddon:
         if not any(pattern.search(url) for pattern in self.patterns):
             return
 
-        # Get referrer from request headers
-        referrer = flow.request.headers.get("Referer", "No Referrer")
-
-        # Initialize referrer group if not exists
-        if referrer not in self.captured_data:
-            self.captured_data[referrer] = {}
-
         # Initialize entry for this URL if not exists
-        if url not in self.captured_data[referrer]:
-            self.captured_data[referrer][url] = {
+        if url not in self.captured_data:
+            self.captured_data[url] = {
                 "request": None,
                 "response": None,
             }
 
         # Capture request data in format compatible with validators
-        self.captured_data[referrer][url]["request"] = {
+        self.captured_data[url]["request"] = {
             "url": url,
             "method": flow.request.method,
             "headers": dict(flow.request.headers),
@@ -75,23 +68,16 @@ class CaptureAddon:
         if not any(pattern.search(url) for pattern in self.patterns):
             return
 
-        # Get referrer from request headers
-        referrer = flow.request.headers.get("Referer", "No Referrer")
-
-        # Initialize referrer group if not exists
-        if referrer not in self.captured_data:
-            self.captured_data[referrer] = {}
-
         # Initialize entry for this URL if not exists
-        if url not in self.captured_data[referrer]:
-            self.captured_data[referrer][url] = {
+        if url not in self.captured_data:
+            self.captured_data[url] = {
                 "request": None,
                 "response": None,
             }
 
         # Capture response data
         if flow.response:
-            self.captured_data[referrer][url]["response"] = {
+            self.captured_data[url]["response"] = {
                 "status_code": flow.response.status_code,
                 "headers": dict(flow.response.headers),
                 "content": flow.response.content.decode("utf-8", errors="ignore")
@@ -105,28 +91,15 @@ class CaptureAddon:
         Called when mitmproxy is shutting down. Save captured data to file.
         """
         if self.captured_data:
-            # Convert to validator-compatible format
-            # Format: {page_url: {networkRequests: {...}}}
-            output_data = {}
-            total_requests = 0
-
-            for referrer, requests in self.captured_data.items():
-                output_data[referrer] = {
-                    "html": "",  # Not captured by mitmproxy
-                    "networkRequests": requests,
-                }
-                total_requests += len(requests)
-
+            # Save all requests to a map
             with open(self.output_file, "w", encoding="utf-8") as f:
-                json.dump(output_data, f, indent=2, ensure_ascii=False)
+                json.dump(self.captured_data, f, indent=2, ensure_ascii=False)
 
-            print(
-                f"\nSaved {total_requests} requests grouped by {len(output_data)} referrer(s) to {self.output_file}"
-            )
+            print(f"\nSaved {len(self.captured_data)} requests to {self.output_file}")
 
 
 def start_mitmproxy(
-    patterns: List[str], port: int = 9000, output_file: str = "requests.json"
+    patterns: List[str], port: int = 9000, output_file: str = "proxy_requests.json"
 ) -> subprocess.Popen:
     """
     Start mitmproxy with the CaptureAddon.
