@@ -29,7 +29,14 @@
   font-size: 16px;
 }
 
+.url-input-group {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+}
+
 .url-input {
+  flex: 1;
   padding: 12px 16px;
   border: 2px solid #e0e0e0;
   border-radius: 6px;
@@ -44,6 +51,28 @@
 
 .url-input:disabled {
   background-color: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.scan-button-inline {
+  padding: 12px 24px;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  white-space: nowrap;
+}
+
+.scan-button-inline:hover:not(:disabled) {
+  background: #45a049;
+}
+
+.scan-button-inline:disabled {
+  background: #cccccc;
   cursor: not-allowed;
 }
 

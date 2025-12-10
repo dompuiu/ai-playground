@@ -53,16 +53,25 @@ function CrawlerForm({ validators, onStartCrawl, isRunning }) {
           <form onSubmit={handleSubmit} className="crawler-form">
             <div className="form-group">
               <label htmlFor="url">Website URL</label>
-              <input
-                type="url"
-                id="url"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                placeholder="https://example.com"
-                required
-                disabled={isRunning}
-                className="url-input"
-              />
+              <div className="url-input-group">
+                <input
+                  type="url"
+                  id="url"
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  placeholder="https://example.com"
+                  required
+                  disabled={isRunning}
+                  className="url-input"
+                />
+                <button 
+                  type="submit" 
+                  className="scan-button-inline"
+                  disabled={isRunning || !url || selectedValidators.length === 0}
+                >
+                  {isRunning ? 'Scanning...' : 'Scan'}
+                </button>
+              </div>
             </div>
 
             <div className="form-group">
@@ -108,13 +117,7 @@ function CrawlerForm({ validators, onStartCrawl, isRunning }) {
               </div>
             </div>
 
-            <button 
-              type="submit" 
-              className="scan-button"
-              disabled={isRunning || !url || selectedValidators.length === 0}
-            >
-              {isRunning ? 'Scanning...' : 'Start Scan'}
-            </button>
+
           </form>
         </>
       )}
