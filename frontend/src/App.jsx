@@ -63,7 +63,6 @@ function App() {
     url,
     selectedValidators,
     maxPages,
-    delayBeforeReturnHtml,
   ) => {
     // Clear previous status updates
     setStatusUpdates([]);
@@ -81,7 +80,6 @@ function App() {
           validators: selectedValidators,
           max_pages: maxPages,
           max_depth: 2,
-          delay_before_return_html: delayBeforeReturnHtml,
         }),
       });
 
