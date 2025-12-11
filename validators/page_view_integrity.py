@@ -27,6 +27,21 @@ def extract_event_type_from_payload(payload: str) -> Optional[str]:
                 if event_type:
                     return event_type
 
+            # Check events array (for newer format)
+            if "events" in data and isinstance(data["events"], list):
+                for event in data["events"]:
+                    # Check event.xdm.eventType
+                    if "xdm" in event:
+                        event_type = event["xdm"].get("eventType")
+                        if event_type:
+                            return event_type
+                    
+                    # Check event.data.eventType
+                    if "data" in event:
+                        event_type = event["data"].get("eventType")
+                        if event_type:
+                            return event_type
+
             # Also check top-level eventType (in case structure differs)
             if "eventType" in data:
                 return data["eventType"]
@@ -64,6 +79,25 @@ def extract_page_url_from_payload(payload: str) -> Optional[str]:
                 url = web_page_details.get("URL")
                 if url:
                     return url
+
+            # Check events array (for newer format)
+            if "events" in data and isinstance(data["events"], list):
+                for event in data["events"]:
+                    # Check event.xdm.web.webPageDetails.URL
+                    if "xdm" in event:
+                        web = event["xdm"].get("web", {})
+                        web_page_details = web.get("webPageDetails", {})
+                        url = web_page_details.get("URL")
+                        if url:
+                            return url
+                    
+                    # Also check event.data.web.webPageDetails.URL
+                    if "data" in event:
+                        web = event["data"].get("web", {})
+                        web_page_details = web.get("webPageDetails", {})
+                        url = web_page_details.get("URL")
+                        if url:
+                            return url
 
     except (json.JSONDecodeError, KeyError, TypeError):
         # If parsing fails or structure is different, return None
