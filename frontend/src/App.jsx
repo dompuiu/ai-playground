@@ -59,7 +59,12 @@ function App() {
     };
   }, []);
 
-  const handleStartCrawl = async (url, selectedValidators, maxPages, delayBeforeReturnHtml) => {
+  const handleStartCrawl = async (
+    url,
+    selectedValidators,
+    maxPages,
+    delayBeforeReturnHtml,
+  ) => {
     // Clear previous status updates
     setStatusUpdates([]);
     setIsRunning(true);
@@ -110,7 +115,7 @@ function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1>Analytics Crawler & Validator</h1>
+        <h1>Data Collection Validator</h1>
         <p>Crawl websites and validate Adobe implementation</p>
       </header>
 
