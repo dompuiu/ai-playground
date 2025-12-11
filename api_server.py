@@ -161,6 +161,12 @@ async def execute_crawl_and_validate(request: CrawlRequest):
             )
         )
 
+        # Delete old data files before starting new crawl
+        for file in ["requests.json", "proxy_requests.json"]:
+            if os.path.exists(file):
+                os.remove(file)
+                print(f"Deleted {file}")
+
         # Run the crawler
         network_patterns = [
             r"https://.*\.adobedc\.net/.*",

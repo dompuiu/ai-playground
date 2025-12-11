@@ -154,9 +154,9 @@ def stop_mitmproxy(process: subprocess.Popen) -> None:
         print(f"\nStopping mitmproxy (PID {process.pid})...")
         process.send_signal(signal.SIGTERM)
 
-        # Wait for graceful shutdown
+        # Wait for graceful shutdown (longer timeout to ensure data is flushed)
         try:
-            process.wait(timeout=5)
+            process.wait(timeout=15)
             print("Mitmproxy stopped successfully")
         except subprocess.TimeoutExpired:
             print("Mitmproxy didn't stop gracefully, forcing...")
