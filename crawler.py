@@ -1,5 +1,6 @@
 import re
 import json
+import os
 from typing import List
 from crawl4ai import AsyncWebCrawler, BrowserConfig, CrawlerRunConfig, CacheMode
 from crawl4ai.deep_crawling import BFSDeepCrawlStrategy
@@ -40,11 +41,12 @@ async def crawl_with_mitmproxy(
             proxy_config={"server": "http://localhost:9000"},
         )
         run_conf = CrawlerRunConfig(
+            js_code="const asyncDataElementNames=[];const promises=[];await new Promise((resolve)=>{if(typeof _satellite!=='undefined'){resolve()}else{const checkInterval=setInterval(()=>{if(typeof _satellite!=='undefined'){clearInterval(checkInterval);resolve()}},100)}});console.log('TAGS DATA ELEMENTS:',JSON.stringify(Object.keys(_satellite?._container?.dataElements||{}).reduce((acc,curr)=>{const v=_satellite.getVar(curr);if(v instanceof Promise){asyncDataElementNames.push(curr);promises.push(v)}acc[curr]=v;return acc},{},),),);Promise.allSettled(promises).then((values)=>{console.log('TAGS ASYNC DATA ELEMENTS:',JSON.stringify(Object.fromEntries(asyncDataElementNames.map((key,i)=>[key,values[i]]),),),)})",
             cache_mode=CacheMode.BYPASS,
             delay_before_return_html=delay_before_return_html,
             page_timeout=60000,
             capture_network_requests=True,
-            capture_console_messages=False,
+            capture_console_messages=True,
             verbose=False,
             deep_crawl_strategy=BFSDeepCrawlStrategy(
                 max_depth=max_depth,
@@ -118,6 +120,7 @@ async def crawl_with_mitmproxy(
 
                     export_data[key] = {
                         "html": result.html,
+                        "logs": result.console_messages,
                         "networkRequests": url_map,
                     }
 
